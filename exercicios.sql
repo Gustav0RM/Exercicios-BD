@@ -234,3 +234,12 @@ WHERE VEN.ven_status = "FATURADA"
 GROUP BY PRO.pro_nome
 HAVING (QTDE_DIAS_APROVADO <= 120)
 ORDER BY PRECO_UNITARIO DESC LIMIT 5 
+
+-- 43 Vendas cujo valor total é acima do ticket médio geral (subquery do ticket).--
+WITH TOTAIS AS (SELECT VEI.vei_ven_id, SUM(VEI.vei_quantidade * VEI.vei_preco_unit VALOR_TOTAL)
+FROM tb_venda_item VEI
+GROUP BY VEI.vei_ven_id)
+SELECT * 
+FROM TOTAIS 
+WHERE VALOR_TOTAL > (SELECT AVG(VALOR_TOTAL) FROM TOTAIS)
+
