@@ -288,5 +288,33 @@ FROM tb_venda_item VEI
 GROUP BY VEI.vei_ven_id)
 SELECT * 
 FROM TOTAIS 
-WHERE VALOR_TOTAL > (SELECT AVG(VALOR_TOTAL) FROM TOTAIS)
+WHERE VALOR_TOTAL > (SELECT AVG(VALOR_TOTAL) 
+FROM TOTAIS)
 
+-- 44 Para cada categoria, o produto mais caro (subquery correlacionada).--
+SELECT PRO.pro_nome PRODUTO, PRC.prc_nome CATEGORIA, PRO.pro_preco MAIOR_PRECO
+FROM tb_produto PRO 
+INNER JOIN tb_produto_categoria PRC ON (PRC.prc_id = PRO.pro_prc_id)
+WHERE PRO.pro_preco = (SELECT MAX(PRO2.pro_preco) 
+FROM tb_produto PRO2 
+WHERE PRO2.pro_prc_id = PRC.prc_id)
+
+-- 45 CTE para total por venda e filtrar apenas as > 1.500. -- 
+WITH TOTAIS AS (SELECT VEI.vei_ven_id, SUM(VEI.vei_quantidade * VEI.vei_preco_unit) VALOR_TOTAL_VENDA 
+FROM tb_venda_item VEI
+GROUP BY VEI.vei_ven_id)
+SELECT * 
+FROM TOTAIS 
+WHERE VALOR_TOTAL_VENDA > 1500
+
+-- 46 CTE para total comprado por fornecedor; mostre fornecedores com > 5.000.
+WITH COMPRAS_TOTAIS AS (SELECT COI.coi_com_id ID_COMPRA, FON.for_nome FORNECEDOR, SUM(COI.coi_custo_unit * COI.coi_quantidade) VALOR_TOTAL
+FROM tb_compra_item COI
+INNER JOIN tb_compra COM ON (COM.com_id = COI.coi_com_id)
+INNER JOIN tb_fornecedor FON ON (COM.com_for_id =  FON.for_id)
+GROUP BY FON.for_id)
+SELECT * 
+FROM COMPRAS_TOTAIS 
+WHERE VALOR_TOTAL > 5000
+
+-- 47 CTE para saldo teórico de estoque por produto: saldo = estoque_atual - vendidos(120d) + comprados(120d).--
