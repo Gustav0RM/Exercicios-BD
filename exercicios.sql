@@ -318,3 +318,21 @@ FROM COMPRAS_TOTAIS
 WHERE VALOR_TOTAL > 5000
 
 -- 47 CTE para saldo teórico de estoque por produto: saldo = estoque_atual - vendidos(120d) + comprados(120d).--
+WITH QTDE_VENDA AS (SELECT VEI.vei_pro_id AS pro_id, SUM(VEI.vei_quantidade) QTDE_PROV
+FROM tb_venda_item VEI
+JOIN tb_venda VEN ON (VEI.vei_ven_id = VEN.ven_id)
+WHERE DATEDIFF(CURRENT_DATE, VEN.ven_data) <= 120 
+AND VEN.ven_status = "FATURADA"
+GROUP BY VEI.vei_pro_id),
+
+QTDE_COMPRA AS (SELECT COI.coi_pro_id AS pro_id, SUM(COI.coi_quantidade) QTDE_PROC
+FROM tb_compra_item COI
+JOIN tb_compra COM ON (COM.com_id = COI.coi_com_id)
+WHERE DATEDIFF(CURRENT_DATE, COM.com_data) <= 120
+GROUP BY COI.coi_pro_id)
+
+SELECT PRO.pro_id, PRO.pro_nome, (COALESCE(QTDE_PROV,0) - COALESCE(QTDE_PROC,0) + COALESCE(EST.est_quantidade,0)) AS ESTOQUE_FICTICIO
+FROM tb_produto PRO
+LEFT JOIN tb_estoque EST ON (EST.est_pro_id = PRO.pro_id)
+LEFT JOIN QTDE_VENDA VEN ON (VEN.pro_id = PRO.pro_id)
+LEFT JOIN QTDE_COMPRA COM ON (COM.pro_id = PRO.pro_id)
