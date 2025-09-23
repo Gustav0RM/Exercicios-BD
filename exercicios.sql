@@ -348,6 +348,6 @@ WITH TOTAL_VENDAS AS (SELECT VEN.ven_id, VEN.ven_cli_id AS cli_id, SUM(VEI.vei_q
 SELECT CLI.cli_id, CLI.cli_razao_social, MAX(VALOR_TOTALV) MAX_VENDA
 FROM tb_cliente CLI 
 JOIN TOTAL_VENDAS VEN ON (VEN.cli_id = CLI.cli_id)
-GROUP BY VEN.ven_id
+GROUP BY CLI.cli_id
 HAVING MAX_VENDA > 1300
 
