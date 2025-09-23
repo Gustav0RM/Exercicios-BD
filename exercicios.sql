@@ -343,7 +343,7 @@ WITH TOTAL_VENDAS AS (SELECT VEN.ven_id, VEN.ven_cli_id AS cli_id, SUM(VEI.vei_q
 					            FROM tb_venda VEN 
 					            JOIN tb_venda_item VEI ON (VEI.vei_ven_id = VEN.ven_id)
                       WHERE VEN.ven_status = "FATURADA"
-                      gGROUP BY VEN.ven_id)
+                      GROUP BY VEN.ven_id)
                      
 SELECT CLI.cli_id, CLI.cli_razao_social, MAX(VALOR_TOTALV) MAX_VENDA
 FROM tb_cliente CLI 
