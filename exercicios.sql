@@ -339,20 +339,15 @@ LEFT JOIN QTDE_COMPRA COM ON (COM.pro_id = PRO.pro_id)
 
 
  -- 48 Clientes cuja maior venda seja > 1.300. -- 
- WITH TOTAL_VENDA AS (SELECT VEN.ven_id, VEN.ven_cli_id AS cli_id, SUM(VEI.vei_quantidade * VEI.vei_preco_unit) VALOR_TOTALV
-                      FROM tb_venda VEN 
-                      JOIN tb_venda_item VEI ON (VEI.vei_ven_id = VEN.ven_id)
-                      WHERE VEN.ven_status = "FATURADA"
-                      GROUP BY VEN.ven_id)
-SELECT CLI.cli_id, CLI.cli_razao_social, VALOR_TOTALV
+WITH TOTAL_VENDAS AS (SELECT VEN.ven_id, VEN.ven_cli_id AS cli_id, SUM(VEI.vei_quantidade * VEI.vei_preco_unit) VALOR_TOTALV
+					 FROM tb_venda VEN 
+					 JOIN tb_venda_item VEI ON (VEI.vei_ven_id = VEN.ven_id)
+                     WHERE VEN.ven_status = "FATURADA"
+                     GROUP BY VEN.ven_id)
+                     
+SELECT CLI.cli_id, CLI.cli_razao_social, MAX(VALOR_TOTALV) MAX_VENDA
 FROM tb_cliente CLI 
-JOIN TOTAL_VENDA VEN ON (VEN.cli_id = CLI.cli_id)
+JOIN TOTAL_VENDAS VEN ON (VEN.cli_id = CLI.cli_id)
 GROUP BY VEN.ven_id
-HAVING VALOR_TOTALV > 1300
--- ou -- 
-SELECT VEN.ven_id, VEN.ven_cli_id AS cli_id, SUM(VEI.vei_quantidade * VEI.vei_preco_unit) VALOR_TOTALV
-FROM tb_venda VEN 
-JOIN tb_venda_item VEI ON (VEI.vei_ven_id = VEN.ven_id)
-WHERE VEN.ven_status = "FATURADA"
-GROUP BY VEN.ven_id
-HAVING VALOR_TOTALV > 1300
+HAVING MAX_VENDA > 1300
+
